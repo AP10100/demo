@@ -51,9 +51,10 @@ pipeline {
                sed -i '41s/port: 80/port: 8080/' my-chart/index-chart/values.yaml 
                sed -i '8s/^/# /' my-chart/index-chart/values.yaml
                sed -i "9i\r  repository: apsp/index-image" my-chart/index-chart/values.yaml 
+               helm template my-chart/index-chart
                cd my-chart/index-chart
                nl -b a values.yaml 
-               helm template my-chart/index-chart
+               
                
                '''
             }
