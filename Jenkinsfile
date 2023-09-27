@@ -47,7 +47,7 @@ pipeline {
                sed -i '40,47 s/^/#/' my-chart/index-chart/templates/deployment.yaml
                sed -i '8s/^/# /' my-chart/index-chart/values.yaml
                sed -i "9i\r  repository: apsp/index-image" my-chart/index-chart/values.yaml 
-               cat my-chart/index-chart/values.yaml
+               cat nl -b a my-chart/index-chart/values.yaml
                '''
             }
         }
