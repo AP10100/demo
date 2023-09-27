@@ -43,7 +43,7 @@ pipeline {
                sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
                sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
                sed -i '40s/type: ClusterIP/ type: NodePort/' my-chart/index-chart/values.yaml
-               sed -i '34s|image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"|image: "{{ .Values.image.repository }}"|' my-chart/index-chart/templates/deployment.yaml
+               sed -i '34s/image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"|image: "{{ .Values.image.repository }}"|' my-chart/index-chart/templates/deployment.yaml
                sed -i '40,47 s|^|#|' my-chart/index-chart/templates/deployment.yaml
                sed -i '8s/repository: nginx/repository: apsp/index-image/' my-chart/index-chart/values.yaml
                cat my-chart/index-chart/values.yaml
