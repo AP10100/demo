@@ -30,7 +30,9 @@ pipeline {
         stage('helm chart creation'){
             steps {
                sh '''
+               sudo docker images
                sudo docker pull apsp/index-image
+               sudo docker images
                sudo helm uninstall index | true
                rm -r my-chart/index-chart | true
                mkdir my-chart | true
