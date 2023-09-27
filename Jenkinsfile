@@ -30,11 +30,36 @@ pipeline {
         stage('helm chart creation'){
             steps {
                sh '''
+               sudo helm uninstall index | true
                rm -r my-chart/index-chart | true
                mkdir my-chart | true
                helm create my-chart/index-chart
                ''' 
             }
+        }
+        stage('helm default changes'){
+            steps {
+               sh '''
+               sed -i "24s/^/# /" my-chart/index-chart/Chart.yaml
+               sed -i "5s/replicaCount: 1/replicaCount: 2/" my-chart/index-chart/values.yaml
+               sed -i "40s/type: ClusterIP/ type: NodePort" my-chart/index-chart/values.yaml
+               sed -i '34s/image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"/image: "{{ .Values.image.repository }}"/' my-chart/index-chart/templates/deployment.yaml
+               sed -i '40,47 s/^/#' my-chart/index-chart/templates/deployment.yaml
+               sed -i '8s/repository: nginx/repository: apsp/index-image' my-chart/index-chart/values.yaml
+               cat my-chart/index-chart/values.yaml
+               '''
+            }
+        }
+        stage('implimentation'){
+            steps {
+                sh '''
+                sudo helm install index my-chart/index-chart
+                sudo kubectl get all
+                export NODE_PORT=$(sudo kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services demo-demo-helm)
+                export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+                echo http://$NODE_IP:$NODE_PORT
+                '''
+            } 
         }
         // Other stages of your pipeline
     }
