@@ -31,6 +31,7 @@ pipeline {
             steps {
                sh '''
                sudo docker images
+               docker image prune -a
                sudo docker pull apsp/index-image:latest
                sudo docker images
                sudo helm uninstall index | true
