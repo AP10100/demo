@@ -53,6 +53,7 @@ pipeline {
                sed -i "9i\r  repository: apsp/index-image" my-chart/index-chart/values.yaml 
                cd my-chart/index-chart
                nl -b a values.yaml 
+               helm template my-chart/index-chart
                
                '''
             }
