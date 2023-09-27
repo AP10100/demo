@@ -1,35 +1,42 @@
 pipeline {
     agent any
+
     stages {
-        stage('Init') {
+        stage('Docker Login') {
             steps {
-                echo 'Initializing..'
-                echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+                script {
+                    def dockerCredentialsId = 'daecaa81-f96c-442b-b2a2-c337d5348879' // Use the ID you specified
+                    withCredentials([usernamePassword(credentialsId: dockerCredentialsId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "sudo docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
+                    }
+                }
             }
         }
-        stage('Test') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Testing..'
-                echo 'Running pytest..'
+                sh '''
+                sudo docker build -t index-image .
+                '''
             }
         }
-        stage('Build') {
+        stage('push Docker Image') {
             steps {
-                echo 'Building..'
-                echo 'Running docker build -t sntshk/cotu .'
+                sh '''
+                sudo docker tag index-image apsp/index-image
+                sudo docker push apsp/index-image
+                '''
             }
         }
-        stage('Publish') {
+        stage('helm chart creation'){
             steps {
-                echo 'Publishing..'
-                echo 'Running docker push..'
+               sh '''
+               rm -r my-chart/index-chart | true
+               mkdir my-chart | true
+               helm create my-chart/index-chart
+               ''' 
             }
         }
-        stage('Cleanup') {
-            steps {
-                echo 'Cleaning..'
-                echo 'Running docker rmi..'
-            }
-        }
+        // Other stages of your pipeline
     }
+
 }
