@@ -31,7 +31,7 @@ pipeline {
             steps {
                sh '''
                sudo docker images
-               sudo docker images -f "dangling=true" -q | xargs docker rmi
+               sudo docker images -f "dangling=true" -q | xargs sudo docker rmi
                sudo docker images
                sudo docker pull apsp/index-image:latest
                sudo docker images
