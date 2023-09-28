@@ -15,15 +15,15 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                sudo docker build -t index-image_new .
+                sudo docker build -t index-image_new:\${BUILD_NUMBER} .
                 '''
             }
         }
         stage('push Docker Image') {
             steps {
                 sh '''
-                sudo docker tag index-image_new apsp/index-image_new:latest
-                sudo docker push apsp/index-image_new:latest
+                sudo docker tag index-image_new apsp/index-image_new:\${BUILD_NUMBER}
+                sudo docker push apsp/index-image_new:\${BUILD_NUMBER}
                 '''
             }
         }
@@ -31,11 +31,8 @@ pipeline {
             steps {
                sh '''
                sudo docker images
-               sudo docker image rmi index-image | true
                sudo docker image rmi apsp/index-image_new | true
                sudo docker images -f "dangling=true" -q | xargs sudo docker rmi | true
-               sudo docker images
-               sudo docker pull apsp/index-image_new:latest
                sudo docker images
                sudo helm uninstall index | true
                rm -r my-chart/index-chart | true
@@ -50,10 +47,11 @@ pipeline {
                sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
                sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
                sed -i '40s/type: ClusterIP/type: NodePort/' my-chart/index-chart/values.yaml
-               sed -i '11s/tag: ""/tag: latest/' my-chart/index-chart/values.yaml
                sed -i '40,47 s/^/#/' my-chart/index-chart/templates/deployment.yaml
                sed -i '41s/port: 80/port: 8080/' my-chart/index-chart/values.yaml 
                sed -i '8s/^/# /' my-chart/index-chart/values.yaml
+               sed -i '11s/^/# /' my-chart/index-chart/values.yaml
+               sed -i "12i\r  tag: ${BUILD_NUMBER}" my-chart/index-chart/values.yaml
                sed -i "9i\r  repository: apsp/index-image_new" my-chart/index-chart/values.yaml 
                helm template my-chart/index-chart
                cd my-chart/index-chart
