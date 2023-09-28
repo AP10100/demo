@@ -54,7 +54,7 @@ pipeline {
                sed -i "12i\r  tag: ${BUILD_NUMBER}" my-chart/index-chart/values.yaml
                sed -i "9i\r  repository: apsp/index-image_new" my-chart/index-chart/values.yaml 
                sed -i "44i\r  nodePort: 30001" my-chart/index-chart/values.yaml
-               sed -i "12i\r      nodePort: {{  .Values.service.nodePort }}" \$HELM_PACKAGE/templates/service.yaml
+               sed -i "12i\r      nodePort: {{  .Values.service.nodePort }}" my-chart/index-chart/templates/service.yaml
                
 
                nl -b a my-chart/index-chart/templates/service.yaml
