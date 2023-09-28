@@ -22,7 +22,7 @@ pipeline {
         stage('push Docker Image') {
             steps {
                 sh '''
-                sudo docker tag index-image_new apsp/index-image_new:\${BUILD_NUMBER}
+                sudo docker tag index-image_new:\${BUILD_NUMBER} apsp/index-image_new:\${BUILD_NUMBER}
                 sudo docker push apsp/index-image_new:\${BUILD_NUMBER}
                 '''
             }
