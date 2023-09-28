@@ -15,6 +15,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
+                sudo docker images -q apsp/index-image_new | xargs sudo docker rmi -f | true
+                sudo docker images -q index-image_new | xargs sudo docker rmi -f | true
                 sudo docker build -t index-image_new:\${BUILD_NUMBER} .
                 '''
             }
