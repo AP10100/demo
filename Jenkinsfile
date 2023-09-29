@@ -44,6 +44,10 @@ pipeline {
         stage('helm default changes'){
             steps {
                sh '''
+               nl -b a my-chart/index-chart/values.yaml 
+               nl -b a my-chart/index-chart/templates/service.yaml
+               nl -b a my-chart/index-chart/Charts.yaml
+               nl -b a my-chart/index-chart/templates/deployment.yaml
                sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
                sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
                sed -i '40s/type: ClusterIP/type: NodePort/' my-chart/index-chart/values.yaml
