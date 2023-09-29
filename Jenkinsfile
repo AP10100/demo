@@ -46,7 +46,7 @@ pipeline {
                sh '''
                nl -b a my-chart/index-chart/values.yaml 
                nl -b a my-chart/index-chart/templates/service.yaml
-               nl -b a my-chart/index-chart/Charts.yaml
+               nl -b a my-chart/index-chart/Chart.yaml
                nl -b a my-chart/index-chart/templates/deployment.yaml
                sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
                sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
