@@ -48,17 +48,19 @@ pipeline {
                nl -b a my-chart/index-chart/templates/service.yaml
                nl -b a my-chart/index-chart/Chart.yaml
                nl -b a my-chart/index-chart/templates/deployment.yaml
+
                sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
                sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
-               sed -i '40s/type: ClusterIP/type: NodePort/' my-chart/index-chart/values.yaml
-               sed -i '40,47 s/^/#/' my-chart/index-chart/templates/deployment.yaml
-               sed -i '41s/port: 80/port: 8080/' my-chart/index-chart/values.yaml 
+               sed -i '43s/type: ClusterIP/type: NodePort/' my-chart/index-chart/values.yaml
+               sed -i '43,50 s/^/#/' my-chart/index-chart/templates/deployment.yaml
+               sed -i '44s/port: 80/port: 8080/' my-chart/index-chart/values.yaml 
                sed -i '8s/^/# /' my-chart/index-chart/values.yaml
                sed -i '11s/^/# /' my-chart/index-chart/values.yaml
                sed -i "12i\r  tag: ${BUILD_NUMBER}" my-chart/index-chart/values.yaml
-               sed -i "9i\r  repository: apsp/index-image_new" my-chart/index-chart/values.yaml 
+               sed -i "9i\r  repository: apsp/index-image_new" my-chart/index-chart/values.yaml
                sed -i "44i\r  nodePort: 30001" my-chart/index-chart/values.yaml
                sed -i "12i\r      nodePort: {{  .Values.service.nodePort }}" my-chart/index-chart/templates/service.yaml
+               
                
 
                nl -b a my-chart/index-chart/templates/service.yaml
