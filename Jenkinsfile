@@ -6,7 +6,7 @@ pipeline {
             PORT_NUMBER = '8080'
             TYPE = 'NodePort'
             HELM_RELEASE = 'index'
-            HELM_PACKAGE = 'my-chart/index-chart'
+            HELM_PACKAGE = 'index-chart'
             REPLICA_COUNT = 2
             NODEPORT = 30001
             TAG = "${BUILD_NUMBER}"
@@ -42,8 +42,8 @@ pipeline {
                sudo docker images
                sudo helm uninstall \$HELM_RELEASE | true
                rm -r \$HELM_PACKAGE | true
-               mkdir my-chart | true
                helm create \$HELM_PACKAGE
+               ls
                ''' 
             }
         }
@@ -55,12 +55,13 @@ pipeline {
                nl -b a \$HELM_PACKAGE/templates/service.yaml
                nl -b a \$HELM_PACKAGE/Chart.yaml
                nl -b a \$HELM_PACKAGE/templates/deployment.yaml
-               sed -i '43,50 s/^/#/' \$HELM_PACKAGE/templates/deployment.yaml
-               nl -b a my-chart/index-chart/templates/service.yaml
-               cd my-chart/index-chart
-               nl -b a values.yaml 
-               
-               
+               sed -i '40,47 s/^/#/' \$HELM_PACKAGE/templates/deployment.yaml
+               sed -i '12s/^/# /' \$HELM_PACKAGE/templates/serviceaccount.yaml
+               nl -b a \$HELM_PACKAGE/values.yaml 
+               nl -b a \$HELM_PACKAGE/templates/service.yaml
+               nl -b a \$HELM_PACKAGE/Chart.yaml
+               nl -b a \$HELM_PACKAGE/templates/deployment.yaml
+                
                '''
             }
         }
