@@ -26,7 +26,7 @@ def replaceValues():
         data = data.replace('type: ClusterIP', f'type: {TYPE}')
         data = data.replace('repository: nginx', f'repository: {DOCKER_IMAGE}')
         data = data.replace('tag: ""', f'tag: {TAG}')
-        data = data.replace('port: 80',f'port: {PORT} \n nodePort: {NODEPORT}')
+        data = data.replace('port: 80',f'port: {PORT} \n  nodePort: {NODEPORT}')
     with open(path, 'w') as file:
         file.write(data)
 
@@ -42,7 +42,7 @@ def replaceService():
     path=HELM_PACKAGE+'/templates/service.yaml'
     with open(path, 'r') as file:
         data = file.read()
-        data = data.replace('targetPort: http', 'targetPort: http \n nodePort: {{ .Values.service.nodePort }}')
+        data = data.replace('targetPort: http', 'targetPort: http \n     nodePort: {{ .Values.service.nodePort }}')
     with open(path, 'w') as file:
         file.write(data)
 
