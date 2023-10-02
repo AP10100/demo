@@ -42,7 +42,7 @@ def replaceService():
     path=HELM_PACKAGE+'/templates/service.yaml'
     with open(path, 'r') as file:
         data = file.read()
-        data = data.replace('targetPort: http', 'targetPort: http \n     nodePort: {{ .Values.service.nodePort }}')
+        data = data.replace('targetPort: http', 'targetPort: http \n      nodePort: {{ .Values.service.nodePort }}')
     with open(path, 'w') as file:
         file.write(data)
 
