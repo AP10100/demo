@@ -55,12 +55,7 @@ pipeline {
                nl -b a \$HELM_PACKAGE/templates/service.yaml
                nl -b a \$HELM_PACKAGE/Chart.yaml
                nl -b a \$HELM_PACKAGE/templates/deployment.yaml
-               sed -i '40,47 s/^/#/' \$HELM_PACKAGE/templates/deployment.yaml
-               sed -i '12s/^/# /' \$HELM_PACKAGE/templates/serviceaccount.yaml
-               nl -b a \$HELM_PACKAGE/values.yaml 
-               nl -b a \$HELM_PACKAGE/templates/service.yaml
-               nl -b a \$HELM_PACKAGE/Chart.yaml
-               nl -b a \$HELM_PACKAGE/templates/deployment.yaml
+            
                '''
             }
         }
