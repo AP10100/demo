@@ -25,14 +25,14 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                sudo docker build -t \$DOCKER_IMAGE:\${BUILD_NUMBER} .
+                sudo docker build -t \$DOCKER_IMAGE:\${TAG} .
                 '''
             }
         }
         stage('push Docker Image') {
             steps {
                 sh '''
-                sudo docker push \$DOCKER_IMAGE:\${BUILD_NUMBER}
+                sudo docker push \$DOCKER_IMAGE:\${TAG}
                 '''
             }
         }
