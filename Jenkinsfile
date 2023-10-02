@@ -40,9 +40,6 @@ pipeline {
             steps {
                sh '''
                sudo docker images
-               sudo docker image rmi apsp/index-image_new | true
-               sudo docker images -f "dangling=true" -q | xargs sudo docker rmi | true
-               sudo docker images
                sudo helm uninstall \$HELM_RELEASE | true
                rm -r \$HELM_PACKAGE | true
                mkdir my-chart | true
@@ -53,25 +50,12 @@ pipeline {
         stage('helm default changes'){
             steps {
                sh '''
-               nl -b a my-chart/index-chart/values.yaml 
-               nl -b a my-chart/index-chart/templates/service.yaml
-               nl -b a my-chart/index-chart/Chart.yaml
-               nl -b a my-chart/index-chart/templates/deployment.yaml
-
-               sed -i '24s/^/# /' my-chart/index-chart/Chart.yaml
-               sed -i '5s/replicaCount: 1/replicaCount: 2/' my-chart/index-chart/values.yaml
-               sed -i '43s/type: ClusterIP/type: NodePort/' my-chart/index-chart/values.yaml
+               python3 script.py
+               nl -b a \$HELM_PACKAGE/values.yaml 
+               nl -b a \$HELM_PACKAGE/templates/service.yaml
+               nl -b a \$HELM_PACKAGE/Chart.yaml
+               nl -b a \$HELM_PACKAGE/templates/deployment.yaml
                sed -i '43,50 s/^/#/' \$HELM_PACKAGE/templates/deployment.yaml
-               sed -i '44s/port: 80/port: 8080/' my-chart/index-chart/values.yaml 
-               sed -i '8s/^/# /' my-chart/index-chart/values.yaml
-               sed -i '11s/^/# /' my-chart/index-chart/values.yaml
-               sed -i "12i\r  tag: ${BUILD_NUMBER}" \$HELM_PACKAGE/values.yaml
-               sed -i "9i\r  repository: apsp/index-image_new" my-chart/index-chart/values.yaml
-               sed -i "44i\r  nodePort: 30001" my-chart/index-chart/values.yaml
-               sed -i "12i\r      nodePort: {{  .Values.service.nodePort }}" my-chart/index-chart/templates/service.yaml
-               
-               
-
                nl -b a my-chart/index-chart/templates/service.yaml
                cd my-chart/index-chart
                nl -b a values.yaml 
