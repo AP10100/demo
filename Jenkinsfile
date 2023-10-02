@@ -55,7 +55,6 @@ pipeline {
                nl -b a \$HELM_PACKAGE/templates/service.yaml
                nl -b a \$HELM_PACKAGE/Chart.yaml
                nl -b a \$HELM_PACKAGE/templates/deployment.yaml
-            
                '''
             }
         }
