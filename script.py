@@ -19,14 +19,14 @@ def replaceChart():
         file.write(data)
 
 def replaceValues():
-    print(f'tag: {TAG}'-1)
+    print(int(f'tag: {TAG}')-1)
     path = HELM_PACKAGE+'/values.yaml'
     with open(path, 'r') as file:
         data = file.read()
         data = data.replace('replicaCount: 1', f'replicaCount: {REPLICA_COUNT}')
         data = data.replace('type: ClusterIP', f'type: {TYPE}')
         data = data.replace('repository: nginx', f'repository: {DOCKER_IMAGE}')
-        data = data.replace(f'tag: {TAG}'-1, f'tag: {TAG}')
+        data = data.replace('tag: 21', f'tag: {TAG}')
         data = data.replace('port: 80',f'port: {PORT} \n  nodePort: {NODEPORT}')
     with open(path, 'w') as file:
         file.write(data)
