@@ -42,10 +42,10 @@ pipeline {
         stage('helm chart creation') {
             steps {
                 sh '''
-               sudo docker images
-               sudo helm uninstall \$HELM_RELEASE | true
-               rm -r \$HELM_PACKAGE | true
-               helm create \$HELM_PACKAGE
+            //    sudo docker images
+            //    sudo helm uninstall \$HELM_RELEASE | true
+            //    rm -r \$HELM_PACKAGE | true
+                  helm create \$HELM_PACKAGE | true
 
                '''
             }
@@ -86,7 +86,8 @@ pipeline {
         stage('Chart upgrade') {
             when {
                 expression {
-                    IS_INSTALLED = 'YES' AND IS_INSTALLED_SAME_PIPELINE != 'YES'
+                    /* groovylint-disable-next-line UnnecessaryBooleanExpression */
+                    IS_INSTALLED = 'YES' && IS_INSTALLED_SAME_PIPELINE != 'YES'
                 }
             }
             steps {
