@@ -49,6 +49,7 @@ pipeline {
             steps {
                 sh '''
                python3 script.py
+               nl -b a \$HELM_PACKAGE/values.yaml
                '''
             }
         }
