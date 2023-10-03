@@ -8,7 +8,7 @@ NODEPORT = os.environ.get('NODEPORT')
 REPLICA_COUNT = os.environ.get('REPLICA_COUNT')
 TYPE = os.environ.get('TYPE')
 DOCKER_IMAGE = os.environ.get('DOCKER_IMAGE')
-
+OLD_DOCKER_IMAGE = os.environ.get('OLD_DOCKER_IMAGE')
 
 def replaceChart():
     path = HELM_PACKAGE+'/Chart.yaml'
@@ -19,7 +19,7 @@ def replaceChart():
         file.write(data)
 
 def replaceValues():
-    print(int(f' {TAG}')-1)
+    print(int(f' {TAG}')-1,OLD_DOCKER_IMAGE)
     path = HELM_PACKAGE+'/values.yaml'
     with open(path, 'r') as file:
         data = file.read()

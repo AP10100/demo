@@ -4,6 +4,7 @@ pipeline {
     agent any
 
     environment {
+            OLD_DOCKER_IMAGE = "${DOCKER_IMAGE}"
             DOCKER_IMAGE = 'apsp/kube-demo-image'
             PORT_NUMBER = '8080'
             TYPE = 'NodePort'
