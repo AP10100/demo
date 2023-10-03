@@ -55,14 +55,14 @@ pipeline {
         }
 
         stage('implimentation') {
+            environment {
+                IS_INSTALLED = 'YES'
+                IS_INSTALLED_SAME_PIPELINE = 'YES'
+            }
             when {
                 expression {
                     IS_INSTALLED != 'YES'
                 }
-            }
-            environment {
-                IS_INSTALLED = 'YES'
-                IS_INSTALLED_SAME_PIPELINE = 'YES'
             }
             steps {
                 sh '''
