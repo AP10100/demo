@@ -50,10 +50,6 @@ pipeline {
             steps {
                 sh '''
                python3 script.py
-               nl -b a \$HELM_PACKAGE/values.yaml
-               nl -b a \$HELM_PACKAGE/templates/service.yaml
-               nl -b a \$HELM_PACKAGE/Chart.yaml
-               nl -b a \$HELM_PACKAGE/templates/deployment.yaml
                '''
             }
         }
