@@ -54,16 +54,17 @@ pipeline {
         }
 
         stage('implimentation') {
-            def releaseExists = sh(script: "helm list -q | grep \$HELM_RELEASE ", returnStatus: true) == 0
-            if (releaseExists) {
-                // Upgrade the release
-                sh '''helm upgrade \$HELM_RELEASE  \$HELM_PACKAGE'''
-            }
+            script{
+                def releaseExists = sh(script: "helm list -q | grep \$HELM_RELEASE ", returnStatus: true) == 0
+                if (releaseExists) {
+                    // Upgrade the release
+                    sh '''helm upgrade \$HELM_RELEASE  \$HELM_PACKAGE'''
+                }
             else {
-                // Install the release
-                sh '''helm install \$HELM_RELEASE  \$HELM_PACKAGE'''
+                    // Install the release
+                    sh '''helm install \$HELM_RELEASE  \$HELM_PACKAGE'''
             }
-
+            }
             steps {
                 sh '''
                 sudo kubectl get all
