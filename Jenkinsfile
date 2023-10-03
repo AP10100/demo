@@ -12,7 +12,6 @@ pipeline {
             REPLICA_COUNT = 2
             NODEPORT = 30001
             TAG = "${BUILD_NUMBER}"
-            IS_INSTALLED_SAME_PIPELINE = 'NO'
     }
     stages {
         stage('Docker Login') {
@@ -55,40 +54,23 @@ pipeline {
         }
 
         stage('implimentation') {
-            environment {
-                IS_INSTALLED = 'YES'
-                IS_INSTALLED_SAME_PIPELINE = 'YES'
+            def releaseExists = sh(script: "helm list -q | grep \$HELM_RELEASE ", returnStatus: true) == 0
+            if (releaseExists) {
+                // Upgrade the release
+                sh "helm upgrade \$HELM_RELEASE  \$HELM_PACKAGE"
             }
-            when {
-                expression {
-                    IS_INSTALLED != 'YES'
-                }
+            else {
+                // Install the release
+                sh "helm install \$HELM_RELEASE  \$HELM_PACKAGE"
             }
+
             steps {
                 sh '''
-                sudo helm install \$HELM_RELEASE  \$HELM_PACKAGE
                 sudo kubectl get all
                 export NODE_PORT=$(sudo kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services index-index-chart)
                 export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
                 echo http://$NODE_IP:$NODE_PORT
                 '''
-            }
-        }
-
-        stage('Chart upgrade') {
-            when {
-                expression {
-                    /* groovylint-disable-next-line UnnecessaryBooleanExpression */
-                    IS_INSTALLED = 'YES' && IS_INSTALLED_SAME_PIPELINE != 'YES'
-                }
-            }
-            steps {
-                sh '''
-               sudo helm upgrade \$HELM_RELEASE \$HELM_PACKAGE
-               export NODE_PORT=$(sudo kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services \$HELM_RELEASE)
-               export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-               echo http://$NODE_IP:$NODE_PORT
-               '''
             }
         }
     // Other stages of your pipeline
