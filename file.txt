@@ -1,0 +1,174 @@
+pipeline {
+    agent any
+
+     environment {
+            DOCKER_IMAGE = 'apsp/kube-demo-image'
+            PORT_NUMBER = '8080'
+            TYPE = 'NodePort'
+            HELM_RELEASE = 'index'
+            HELM_PACKAGE = 'index-chart'
+            REPLICA_COUNT = 2
+            NODEPORT = 30001
+            TAG = "${BUILD_NUMBER}"
+    }
+    stages {
+        stage('Docker Login') {
+            steps {
+                script {
+                    def dockerCredentialsId = 'daecaa81-f96c-442b-b2a2-c337d5348879' // Use the ID you specified
+                    withCredentials([usernamePassword(credentialsId: dockerCredentialsId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "sudo docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
+                    }
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                sudo docker build -t \$DOCKER_IMAGE:\${TAG} .
+                '''
+            }
+        }
+        stage('push Docker Image') {
+            steps {
+                sh '''
+                sudo docker push \$DOCKER_IMAGE:\${TAG}
+                '''
+            }
+        }
+        stage('helm chart creation'){
+            steps {
+               sh '''
+               sudo docker images
+               sudo helm uninstall \$HELM_RELEASE | true
+               rm -r \$HELM_PACKAGE | true
+               helm create \$HELM_PACKAGE
+               
+               ''' 
+            }
+        }
+        stage('helm default changes'){
+            steps {
+               sh '''
+               python3 script.py
+               nl -b a \$HELM_PACKAGE/values.yaml 
+               nl -b a \$HELM_PACKAGE/templates/service.yaml
+               nl -b a \$HELM_PACKAGE/Chart.yaml
+               nl -b a \$HELM_PACKAGE/templates/deployment.yaml
+               '''
+            }
+        }
+
+
+
+
+        
+        stage('implimentation'){
+            steps {
+                sh '''
+                sudo helm install \$HELM_RELEASE  \$HELM_PACKAGE
+                sudo kubectl get all
+                export NODE_PORT=$(sudo kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services index-index-chart)
+                export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+                echo http://$NODE_IP:$NODE_PORT
+                '''
+            } 
+        }
+        // Other stages of your pipeline
+    }
+
+}
+
+
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+
+
+
+
+import os
+
+HELM_RELEASE = os.environ.get('HELM_RELEASE')
+HELM_PACKAGE = os.environ.get('HELM_PACKAGE')
+TAG = os.environ.get('TAG')
+PORT = os.environ.get('PORT_NUMBER')
+NODEPORT = os.environ.get('NODEPORT')
+REPLICA_COUNT = os.environ.get('REPLICA_COUNT')
+TYPE = os.environ.get('TYPE')
+DOCKER_IMAGE = os.environ.get('DOCKER_IMAGE')
+
+
+def replaceChart():
+    path = HELM_PACKAGE+'/Chart.yaml'
+    with open(path, 'r') as file:
+        data = file.read()
+        data = data.replace('appVersion: "1.16.0"', '#appVersion: "1.16.0"')
+    with open(path, 'w') as file:
+        file.write(data)
+
+def replaceValues():
+    path = HELM_PACKAGE+'/values.yaml'
+    with open(path, 'r') as file:
+        data = file.read()
+        data = data.replace('replicaCount: 1', f'replicaCount: {REPLICA_COUNT}')
+        data = data.replace('type: ClusterIP', f'type: {TYPE}')
+        data = data.replace('repository: nginx', f'repository: {DOCKER_IMAGE}')
+        data = data.replace('tag: ""', f'tag: {TAG}')
+        data = data.replace('port: 80',f'port: {PORT} \n  nodePort: {NODEPORT}')
+    with open(path, 'w') as file:
+        file.write(data)
+
+def replaceServiceAccount():
+    path= HELM_PACKAGE+'/templates/serviceaccount.yaml'
+    with open(path, 'r') as file:
+        data = file.read()
+        data = data.replace('automountServiceAccountToken:', '#automountServiceAccountToken:')
+    with open(path, 'w') as file:
+        file.write(data)
+
+def replaceService():
+    path=HELM_PACKAGE+'/templates/service.yaml'
+    with open(path, 'r') as file:
+        data = file.read()
+        data = data.replace('targetPort: http', 'targetPort: http \n      nodePort: {{ .Values.service.nodePort }}')
+    with open(path, 'w') as file:
+        file.write(data)
+
+def findLineNumber():
+    target_word = 'livenessProbe:'
+    path = HELM_PACKAGE+'/templates/deployment.yaml'
+    line_number = 0
+    with open(path, 'r') as file:
+        for line in file:
+            line_number += 1
+            if target_word in line:
+                return line_number
+
+def findLineContent(line_number):
+    path = HELM_PACKAGE+'/templates/deployment.yaml'
+    with open(path, 'r') as file:
+        content = file.readlines()
+        return content[line_number-1:line_number+4]
+
+def replaceContent(content):
+    path = HELM_PACKAGE+'/templates/deployment.yaml'
+    with open(path, 'r') as file:
+        data = file.read()
+        for i in content:
+            print(i)
+            data = data.replace(i, '#'+i)
+    with open(path, 'w') as file:
+        file.write(data)
+
+def replaceDeployment():
+    line_number = findLineNumber()
+    content = findLineContent(line_number)
+    replaceContent(content)
+ 
+replaceChart()
+replaceValues()
+replaceServiceAccount()
+replaceService()
+replaceDeployment()

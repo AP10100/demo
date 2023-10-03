@@ -1,7 +1,9 @@
+/* groovylint-disable DuplicateStringLiteral, GStringExpressionWithinString, LineLength, NestedBlockDepth, NoDef, VariableTypeRequired */
+/* groovylint-disable-next-line CompileStatic */
 pipeline {
     agent any
 
-     environment {
+    environment {
             DOCKER_IMAGE = 'apsp/kube-demo-image'
             PORT_NUMBER = '8080'
             TYPE = 'NodePort'
@@ -10,6 +12,7 @@ pipeline {
             REPLICA_COUNT = 2
             NODEPORT = 30001
             TAG = "${BUILD_NUMBER}"
+            IS_INSTALLED_SAME_PIPELINE = 'NO'
     }
     stages {
         stage('Docker Login') {
@@ -36,21 +39,22 @@ pipeline {
                 '''
             }
         }
-        stage('helm chart creation'){
+        stage('helm chart creation') {
             steps {
-               sh '''
+                sh '''
                sudo docker images
                sudo helm uninstall \$HELM_RELEASE | true
                rm -r \$HELM_PACKAGE | true
                helm create \$HELM_PACKAGE
-               ''' 
+
+               '''
             }
         }
-        stage('helm default changes'){
+        stage('helm default changes') {
             steps {
-               sh '''
+                sh '''
                python3 script.py
-               nl -b a \$HELM_PACKAGE/values.yaml 
+               nl -b a \$HELM_PACKAGE/values.yaml
                nl -b a \$HELM_PACKAGE/templates/service.yaml
                nl -b a \$HELM_PACKAGE/Chart.yaml
                nl -b a \$HELM_PACKAGE/templates/deployment.yaml
@@ -58,11 +62,16 @@ pipeline {
             }
         }
 
-
-
-
-        
-        stage('implimentation'){
+        stage('implimentation') {
+            when {
+                expression {
+                    IS_INSTALLED != 'YES'
+                }
+            }
+            environment {
+                IS_INSTALLED = 'YES'
+                IS_INSTALLED_SAME_PIPELINE = 'YES'
+            }
             steps {
                 sh '''
                 sudo helm install \$HELM_RELEASE  \$HELM_PACKAGE
@@ -71,9 +80,24 @@ pipeline {
                 export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
                 echo http://$NODE_IP:$NODE_PORT
                 '''
-            } 
+            }
         }
-        // Other stages of your pipeline
-    }
 
+        stage('Chart upgrade') {
+            when {
+                expression {
+                    IS_INSTALLED = 'YES' AND IS_INSTALLED_SAME_PIPELINE != 'YES'
+                }
+            }
+            steps {
+                sh '''
+               sudo helm upgrade \$HELM_RELEASE \$HELM_PACKAGE
+               export NODE_PORT=$(sudo kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services \$HELM_RELEASE)
+               export NODE_IP=$(sudo kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+               echo http://$NODE_IP:$NODE_PORT
+               '''
+            }
+        }
+    // Other stages of your pipeline
+    }
 }
