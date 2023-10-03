@@ -42,12 +42,8 @@ pipeline {
         stage('helm chart creation') {
             steps {
                 sh '''
-            //    sudo docker images
-            //    sudo helm uninstall \$HELM_RELEASE | true
-            //    rm -r \$HELM_PACKAGE | true
                   helm create \$HELM_PACKAGE | true
-
-               '''
+                '''
             }
         }
         stage('helm default changes') {
