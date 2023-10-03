@@ -54,7 +54,7 @@ pipeline {
         }
 
         stage('implimentation') {
-            script{
+            script {
                 def releaseExists = sh(script: "helm list -q | grep \$HELM_RELEASE ", returnStatus: true) == 0
                 if (releaseExists) {
                     // Upgrade the release
