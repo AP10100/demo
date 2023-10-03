@@ -5,6 +5,7 @@ pipeline {
 
     environment {
             OLD_DOCKER_IMAGE = "${DOCKER_IMAGE}"
+            OLD_TAG = "${TAG}"
             DOCKER_IMAGE = 'apsp/kube-demo-image'
             PORT_NUMBER = '8080'
             TYPE = 'NodePort'
