@@ -19,6 +19,7 @@ def replaceChart():
         file.write(data)
 
 def replaceValues():
+    print("tag>>>>>>>>>>>>>..",TAG)
     path = HELM_PACKAGE+'/values.yaml'
     with open(path, 'r') as file:
         data = file.read()
