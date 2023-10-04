@@ -44,7 +44,6 @@ pipeline {
                sudo helm uninstall \$HELM_RELEASE | true
                rm -r \$HELM_PACKAGE | true
                helm create \$HELM_PACKAGE
-
                '''
             }
         }
