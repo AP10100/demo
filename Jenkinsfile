@@ -18,7 +18,7 @@ pipeline {
                 script {
                     def dockerCredentialsId = 'daecaa81-f96c-442b-b2a2-c337d5348879' // Use the ID you specified
                     withCredentials([usernamePassword(credentialsId: dockerCredentialsId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh "sudo docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
+                        sh " docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
                     }
                 }
             }
